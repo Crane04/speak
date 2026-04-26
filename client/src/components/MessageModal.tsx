@@ -1,7 +1,10 @@
 import { useEffect, useState, useCallback } from "react";
 import { Message } from "../types/message";
 import { fetchMessage, reportMessage } from "../api/messages";
+import { reverseGeocode, type ReverseGeocodeResult } from "../api/geo";
 import MediaRenderer from "./MediaRenderer";
+import Button from "./ui/Button";
+import { MapPinIcon } from "./icons";
 
 interface MessageModalProps {
   messageId: string;
@@ -22,18 +25,48 @@ export default function MessageModal({ messageId, onClose }: MessageModalProps) 
   const [error, setError] = useState<string | null>(null);
   const [reported, setReported] = useState(false);
   const [reporting, setReporting] = useState(false);
+  const [place, setPlace] = useState<ReverseGeocodeResult | null>(null);
+  const [placeLoading, setPlaceLoading] = useState(false);
 
   useEffect(() => {
     setLoading(true);
     setError(null);
     setMessage(null);
     setReported(false);
+    setPlace(null);
 
     fetchMessage(messageId)
       .then(setMessage)
       .catch(() => setError("This message could not be loaded."))
       .finally(() => setLoading(false));
   }, [messageId]);
+
+  useEffect(() => {
+    if (!message) return;
+
+    const controller = new AbortController();
+    let active = true;
+    setPlaceLoading(true);
+    reverseGeocode(message.lat, message.lng, { signal: controller.signal })
+      .then((data) => {
+        if (!active) return;
+        setPlace(data);
+      })
+      .catch(() => {
+        // If reverse geocode fails, we still show coordinates.
+        if (!active) return;
+        setPlace(null);
+      })
+      .finally(() => {
+        if (!active) return;
+        setPlaceLoading(false);
+      });
+
+    return () => {
+      active = false;
+      controller.abort();
+    };
+  }, [message]);
 
   // Close on Escape
   useEffect(() => {
@@ -67,6 +100,9 @@ export default function MessageModal({ messageId, onClose }: MessageModalProps) 
     });
 
   const accentColor = message ? (TYPE_COLORS[message.type] ?? "#7dd3fc") : "#7dd3fc";
+  const coordsLabel = message
+    ? `${message.lat.toFixed(3)}°,\u00A0${message.lng.toFixed(3)}°`
+    : "";
 
   return (
     <div
@@ -93,12 +129,14 @@ export default function MessageModal({ messageId, onClose }: MessageModalProps) 
               {message?.type ?? "message"}
             </span>
           </div>
-          <button
+          <Button
+            variant="ghost"
+            size="sm"
             onClick={onClose}
-            className="w-7 h-7 flex items-center justify-center rounded-lg text-slate-500 hover:text-white hover:bg-white/5 transition-all text-lg leading-none"
+            className="w-8 h-8 px-0 py-0 rounded-lg text-slate-500 hover:text-white hover:bg-white/5 text-lg leading-none"
           >
             ×
-          </button>
+          </Button>
         </div>
 
         {/* Body */}
@@ -142,17 +180,24 @@ export default function MessageModal({ messageId, onClose }: MessageModalProps) 
             <div className="text-[11px] font-display text-slate-600 space-x-2">
               <span>{formatDate(message.createdAt)}</span>
               <span>·</span>
-              <span>
-                {message.lat.toFixed(3)}°,&nbsp;{message.lng.toFixed(3)}°
+              <span
+                className="inline-flex items-center gap-1.5"
+                title={coordsLabel || undefined}
+              >
+                <MapPinIcon size={13} className="text-slate-600" />
+                <span className="truncate max-w-[220px]">
+                  {placeLoading ? "locating…" : place?.display ?? coordsLabel}
+                </span>
               </span>
             </div>
-            <button
+            <Button
+              variant="link"
               onClick={handleReport}
               disabled={reported || reporting}
-              className="text-[11px] font-display text-slate-700 hover:text-red-400 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+              className="text-[11px] text-slate-500 hover:text-red-300"
             >
               {reported ? "reported" : reporting ? "..." : "report"}
-            </button>
+            </Button>
           </div>
         )}
       </div>
