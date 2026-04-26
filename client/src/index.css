@@ -26,7 +26,7 @@ body,
   padding: 0;
   background: var(--bg-primary);
   color: var(--text-primary);
-  font-family: 'DM Sans', sans-serif;
+  font-family: 'Playpen Sans', ui-sans-serif, system-ui, sans-serif;
   overflow: hidden;
 }
 

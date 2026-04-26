@@ -19,8 +19,8 @@ export default {
         },
       },
       fontFamily: {
-        display: ["'Space Mono'", "monospace"],
-        body: ["'DM Sans'", "sans-serif"],
+        display: ["'Playpen Sans'", "ui-sans-serif", "system-ui", "sans-serif"],
+        body: ["'Playpen Sans'", "ui-sans-serif", "system-ui", "sans-serif"],
       },
       animation: {
         "pulse-slow": "pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite",

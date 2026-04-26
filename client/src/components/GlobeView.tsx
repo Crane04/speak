@@ -45,6 +45,7 @@ const DEFAULT_CAMERA_DISTANCE = 600;
 const CITY_GRID_DEG = 2;
 const MAX_CITY_LABELS = 200;
 const CAMERA_SAMPLE_MS = 120;
+const CITY_TEXT_GRID_DEG = 0.6;
 
 type LoadStatus = "idle" | "loading" | "loaded" | "error";
 
@@ -56,6 +57,7 @@ type GeoJsonFeature = {
 
 type CityRecord = { lat: number; lng: number; name: string };
 type CountryRecord = { lat: number; lng: number; feature: GeoJsonFeature };
+type CityMarker = CityRecord & { displayName?: string };
 
 function wrapLngDiffDegrees(a: number, b: number) {
   let d = Math.abs(a - b);
@@ -162,6 +164,33 @@ function pickClosestLatLng<T extends { lat: number; lng: number }>(
   }
 
   return chosen.map((c) => c.item);
+}
+
+function pickNonOverlappingCityNames(
+  candidates: CityRecord[],
+  center: { lat: number; lng: number },
+  limit: number,
+) {
+  const byCell = new Map<
+    string,
+    { city: CityRecord; d2: number }
+  >();
+
+  for (const city of candidates) {
+    const cellLat = Math.floor((city.lat + 90) / CITY_TEXT_GRID_DEG);
+    const cellLng = Math.floor((city.lng + 180) / CITY_TEXT_GRID_DEG);
+    const key = `${cellLat}:${cellLng}`;
+
+    const dLat = city.lat - center.lat;
+    const dLng = wrapLngDiffDegrees(city.lng, center.lng);
+    const d2 = dLat * dLat + dLng * dLng;
+
+    const existing = byCell.get(key);
+    if (!existing || d2 < existing.d2) byCell.set(key, { city, d2 });
+  }
+
+  const unique = Array.from(byCell.values()).map((v) => v.city);
+  return pickClosestLatLng(unique, center, limit);
 }
 
 export default function GlobeView({
@@ -434,7 +463,7 @@ export default function GlobeView({
 
   const cityGrid = useMemo(() => buildCityGridIndex(allCities), [allCities]);
 
-  const visibleCities = useMemo(() => {
+  const visibleCities = useMemo<CityMarker[]>(() => {
     if (!showCities || allCities.length === 0) return [];
 
     // In degrees: smaller window as you get closer to the surface.
@@ -471,7 +500,17 @@ export default function GlobeView({
       return dLat <= degWindow && dLng <= degWindow;
     });
 
-    return pickClosestLatLng(filtered, pov, MAX_CITY_LABELS);
+    const picked = pickClosestLatLng(filtered, pov, MAX_CITY_LABELS);
+
+    // Show only a small number of city names; keep the rest as dots to avoid a cluttered "word cloud".
+    const textLimit = zoom < 95 ? 50 : zoom < 110 ? 20 : 0;
+    const named = pickNonOverlappingCityNames(picked, pov, textLimit);
+    const namedKeys = new Set(named.map((c) => `${c.lat}:${c.lng}:${c.name}`));
+
+    return picked.map((c) => ({
+      ...c,
+      displayName: namedKeys.has(`${c.lat}:${c.lng}:${c.name}`) ? c.name : "",
+    }));
   }, [allCities.length, cityGrid, pov.lat, pov.lng, showCities, zoom]);
 
   // Merge countries + states into one polygons array, tagged by type
@@ -553,13 +592,22 @@ export default function GlobeView({
           onPolygonClick={handlePolygonClick}
           // ── City labels ──
           labelsData={showCities ? visibleCities : []}
-          labelLat={(c: object) => (c as CityRecord).lat}
-          labelLng={(c: object) => (c as CityRecord).lng}
-          labelText={(c: object) => (c as CityRecord).name}
-          labelSize={0.4}
+          labelLat={(c: object) => (c as CityMarker).lat}
+          labelLng={(c: object) => (c as CityMarker).lng}
+          labelText={(c: object) => (c as CityMarker).displayName ?? ""}
+          labelLabel={(c: object) => {
+            const city = c as CityMarker;
+            if (!city.name) return "";
+            return `<div style="background:rgba(5,5,15,0.85);border-radius:6px;padding:4px 8px;font-family:'Space Mono',monospace;font-size:11px;color:#e2e8f0;white-space:nowrap;">${city.name}</div>`;
+          }}
+          labelSize={(c: object) => ((c as CityMarker).displayName ? 0.22 : 0.02)}
           labelResolution={1}
-          labelColor={() => "rgba(148,163,184,0.65)"}
-          labelDotRadius={0.15}
+          labelColor={(c: object) =>
+            (c as CityMarker).displayName
+              ? "rgba(226,232,240,0.75)"
+              : "rgba(148,163,184,0.18)"
+          }
+          labelDotRadius={(c: object) => ((c as CityMarker).displayName ? 0.14 : 0.1)}
           labelAltitude={0.002}
           onLabelClick={handleLabelClick}
           // ── Message pins ──
