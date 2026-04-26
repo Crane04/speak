@@ -88,6 +88,11 @@ dist
 # Gatsby uses /public; this repo uses Vite's client/public, so don't ignore it.
 # public
 
+# Large raw map datasets (we use simplified/minified versions in-app)
+client/public/admin1.geojson
+client/public/cities.geojson
+client/public/countries.geojson
+
 # vuepress build output
 .vuepress/dist
 
