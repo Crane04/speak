@@ -1,4 +1,4 @@
-export type MessageType = "text" | "image" | "audio" | "document" | "video";
+export type MessageType = "text" | "image" | "audio";
 
 export type MessageStatus = "pending" | "approved" | "rejected";
 

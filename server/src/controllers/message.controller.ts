@@ -1,17 +1,19 @@
 import { Request, Response } from "express";
-import { v2 as cloudinary } from "cloudinary";
+import cloudinary from "../config/cloudinary";
 import { MessageModel } from "../models/Message";
 import { MessageType } from "../types/message";
 
-// Determine Cloudinary resource type from MIME type
 const getResourceType = (mimeType: string): "image" | "video" | "raw" => {
   if (mimeType.startsWith("image/")) return "image";
-  if (mimeType.startsWith("video/") || mimeType.startsWith("audio/")) return "video";
+  if (mimeType.startsWith("audio/")) return "video";
   return "raw";
 };
 
 // POST /api/messages
-export const createMessage = async (req: Request, res: Response): Promise<void> => {
+export const createMessage = async (
+  req: Request,
+  res: Response,
+): Promise<void> => {
   try {
     const { type, text, lat, lng } = req.body;
     const latNum = parseFloat(lat);
@@ -25,21 +27,24 @@ export const createMessage = async (req: Request, res: Response): Promise<void> 
       const resourceType = getResourceType(mimeType);
 
       // Upload buffer to Cloudinary
-      const uploadResult = await new Promise<{ secure_url: string }>((resolve, reject) => {
-        const uploadStream = cloudinary.uploader.upload_stream(
-          {
-            resource_type: resourceType,
-            folder: "speak",
-            use_filename: false,
-            unique_filename: true,
-          },
-          (error, result) => {
-            if (error || !result) return reject(error || new Error("Upload failed"));
-            resolve(result);
-          }
-        );
-        uploadStream.end(req.file!.buffer);
-      });
+      const uploadResult = await new Promise<{ secure_url: string }>(
+        (resolve, reject) => {
+          const uploadStream = cloudinary.uploader.upload_stream(
+            {
+              resource_type: resourceType,
+              folder: "wandr",
+              use_filename: false,
+              unique_filename: true,
+            },
+            (error, result) => {
+              if (error || !result)
+                return reject(error || new Error("Upload failed"));
+              resolve(result);
+            },
+          );
+          uploadStream.end(req.file!.buffer);
+        },
+      );
 
       fileUrl = uploadResult.secure_url;
       fileMimeType = mimeType;
@@ -91,7 +96,10 @@ export const getPins = async (_req: Request, res: Response): Promise<void> => {
 };
 
 // GET /api/messages/:id
-export const getMessageById = async (req: Request, res: Response): Promise<void> => {
+export const getMessageById = async (
+  req: Request,
+  res: Response,
+): Promise<void> => {
   try {
     const message = await MessageModel.findById(req.params.id).lean();
 
@@ -124,12 +132,15 @@ export const getMessageById = async (req: Request, res: Response): Promise<void>
 };
 
 // POST /api/messages/:id/report
-export const reportMessage = async (req: Request, res: Response): Promise<void> => {
+export const reportMessage = async (
+  req: Request,
+  res: Response,
+): Promise<void> => {
   try {
     const message = await MessageModel.findByIdAndUpdate(
       req.params.id,
       { $inc: { reportCount: 1 } },
-      { new: true }
+      { new: true },
     );
 
     if (!message) {

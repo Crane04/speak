@@ -32,7 +32,7 @@ app.use("/api/geo", geoRoutes);
 
 // Health check
 app.get("/health", (_req, res) => {
-  res.json({ status: "ok", service: "speak-api" });
+  res.json({ status: "ok", service: "wandr-api" });
 });
 
 // 404 handler

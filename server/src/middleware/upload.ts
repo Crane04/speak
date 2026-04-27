@@ -7,20 +7,15 @@ const ALLOWED_MIME_TYPES = [
   "image/png",
   "image/gif",
   "image/webp",
-  // audio
-  "audio/mpeg",
+  // voice notes
+  "audio/webm",
   "audio/wav",
+  "audio/x-wav",
   "audio/ogg",
   "audio/mp4",
-  // video
-  "video/mp4",
-  "video/webm",
-  "video/ogg",
-  // documents
-  "application/pdf",
-  "application/msword",
-  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-  "text/plain",
+  "audio/m4a",
+  "audio/x-m4a",
+  "audio/aac",
 ];
 
 const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
