@@ -6,9 +6,7 @@ import Button from "../ui/Button";
 const TYPE_ICON: Record<string, string> = {
   text: "T",
   image: "IMG",
-  audio: "AUD",
-  video: "VID",
-  document: "DOC",
+  audio: "VOICE",
 };
 
 const STATUS_COLORS: Record<string, string> = {
@@ -164,4 +162,3 @@ export default function AdminMessageRow({ msg }: { msg: AdminMessage }) {
     </div>
   );
 }
-

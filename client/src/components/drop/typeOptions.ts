@@ -22,25 +22,12 @@ export const TYPE_OPTIONS: TypeOption[] = [
   },
   {
     value: "audio",
-    label: "Audio",
-    accept: "audio/*",
-    hint: "MP3, WAV, OGG · max 50MB",
-  },
-  {
-    value: "video",
-    label: "Video",
-    accept: "video/*",
-    hint: "MP4, WebM · max 50MB",
-  },
-  {
-    value: "document",
-    label: "Doc",
-    accept: ".pdf,.doc,.docx,.txt,application/pdf",
-    hint: "PDF, DOCX, TXT · max 50MB",
+    label: "Voice note",
+    accept: "",
+    hint: "Voice note · max 30 seconds",
   },
 ];
 
 export function getTypeOption(type: MessageType) {
   return TYPE_OPTIONS.find((o) => o.value === type) ?? TYPE_OPTIONS[0];
 }
-

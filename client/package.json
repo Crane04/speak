@@ -1,7 +1,7 @@
 {
-  "name": "speak-client",
+  "name": "wandr-client",
   "version": "1.0.0",
-  "description": "Speak - Global Anonymous Message Platform",
+  "description": "wandr - Global Anonymous Message Platform",
   "type": "module",
   "scripts": {
     "dev": "vite",

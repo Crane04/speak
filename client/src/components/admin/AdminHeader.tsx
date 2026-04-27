@@ -13,7 +13,7 @@ export default function AdminHeader() {
     <div className="flex items-start justify-between mb-8 flex-wrap gap-4">
       <div>
         <h1 className="font-display text-2xl text-white tracking-widest">
-          SPEAK<span className="text-sky-400">/</span>ADMIN
+          wandr<span className="text-sky-400">/</span>ADMIN
         </h1>
         <p className="text-slate-600 text-xs mt-1 font-display tracking-widest">
           MODERATION DASHBOARD

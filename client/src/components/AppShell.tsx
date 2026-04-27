@@ -74,7 +74,7 @@ export default function AppShell({
             onClick={() => navigate("/")}
             className="text-2xl text-slate-100 tracking-wide px-0 py-0"
           >
-            Speak
+            wandr
           </Button>
           <nav className="hidden sm:flex items-center gap-6">
             <TopLink to="/" label="Feed" />
@@ -98,7 +98,7 @@ export default function AppShell({
         <aside className="hidden md:flex w-[270px] px-5 py-7 border-r border-white/6">
           <div className="flex flex-col w-full">
             <div className="mb-8">
-              <div className="font-display text-3xl text-slate-100">Speak</div>
+              <div className="font-display text-3xl text-slate-100">wandr</div>
               <div className="text-slate-500 text-sm font-display mt-1">
                 anonymous messages, everywhere
               </div>

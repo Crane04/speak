@@ -9,7 +9,7 @@ export default function AdminAuth() {
       <div className="glass rounded-2xl p-8 w-full max-w-sm animate-fade-in">
         <div className="mb-6">
           <h1 className="font-display text-xl text-white tracking-widest">
-            SPEAK<span className="text-sky-400">/</span>ADMIN
+            wandr<span className="text-sky-400">/</span>ADMIN
           </h1>
           <p className="text-slate-600 text-xs mt-1.5 font-display tracking-wider">
             MODERATION DASHBOARD

@@ -1,6 +1,6 @@
 import { MessageType } from "../../types/message";
 import { useDropMessageForm } from "../../contexts/dropMessageContext";
-import { FileIcon, ImageIcon, MicIcon, TypeIcon, VideoIcon } from "../icons";
+import { ImageIcon, MicIcon, TypeIcon } from "../icons";
 import { TYPE_OPTIONS } from "./typeOptions";
 import Button from "../ui/Button";
 import { cn } from "../ui/cn";
@@ -13,10 +13,6 @@ function TypeTabIcon({ type }: { type: MessageType }) {
       return <ImageIcon />;
     case "audio":
       return <MicIcon />;
-    case "video":
-      return <VideoIcon />;
-    case "document":
-      return <FileIcon />;
     default:
       return <TypeIcon />;
   }

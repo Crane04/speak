@@ -28,16 +28,12 @@ const PIN_COLORS: Record<MessageType, string> = {
   text: "#e2e8f0",
   image: "#7dd3fc",
   audio: "#86efac",
-  video: "#f9a8d4",
-  document: "#fde68a",
 };
 
 const PIN_LABELS: Record<MessageType, string> = {
   text: "Text",
   image: "Image",
-  audio: "Audio",
-  video: "Video",
-  document: "Doc",
+  audio: "Voice note",
 };
 
 const Globe = lazy(() => import("react-globe.gl"));

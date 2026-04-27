@@ -59,7 +59,7 @@ export function ImageIcon(props: IconProps) {
 }
 
 export function MicIcon(props: IconProps) {
-  return <Wrap Icon={LuMic} {...props} title={props.title ?? "Audio"} />;
+  return <Wrap Icon={LuMic} {...props} title={props.title ?? "Voice note"} />;
 }
 
 export function VideoIcon(props: IconProps) {

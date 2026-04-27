@@ -9,16 +9,12 @@ const TYPE_COLORS: Record<MessageType, string> = {
   text: "#e2e8f0",
   image: "#7dd3fc",
   audio: "#86efac",
-  video: "#f9a8d4",
-  document: "#fde68a",
 };
 
 const LEGEND: { type: MessageType; label: string }[] = [
   { type: "text", label: "Text" },
   { type: "image", label: "Image" },
-  { type: "audio", label: "Audio" },
-  { type: "video", label: "Video" },
-  { type: "document", label: "Doc" },
+  { type: "audio", label: "Voice note" },
 ];
 
 export default function Home() {
@@ -85,7 +81,7 @@ export default function Home() {
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-6 z-10">
             <div className="text-center space-y-2">
               <h1 className="font-display text-5xl tracking-[0.05em] text-white">
-                Speak
+                wandr
               </h1>
               <p className="text-slate-700 text-sm font-display tracking-wide">
                 anonymous · everywhere

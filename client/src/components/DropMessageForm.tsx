@@ -1,11 +1,12 @@
 import { DropMessageProvider, useDropMessageForm } from "../contexts/dropMessageContext";
 import ErrorBanner from "./drop/ErrorBanner";
 import FileSection from "./drop/FileSection";
-import LocationSection from "./drop/LocationSection";
+// import LocationSection from "./drop/LocationSection";
 import SubmitButton from "./drop/SubmitButton";
 import SuccessState from "./drop/SuccessState";
 import TextSection from "./drop/TextSection";
 import TypeTabs from "./drop/TypeTabs";
+import VoiceNoteSection from "./drop/VoiceNoteSection";
 
 function DropMessageFormInner() {
   const { state } = useDropMessageForm();
@@ -17,7 +18,8 @@ function DropMessageFormInner() {
       <TypeTabs />
       <TextSection />
       <FileSection />
-      <LocationSection />
+      <VoiceNoteSection />
+      {/* <LocationSection /> */}
       <ErrorBanner />
       <SubmitButton />
     </div>

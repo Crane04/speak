@@ -8,7 +8,7 @@ export default function FileSection() {
   const [dragOver, setDragOver] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
-  if (state.type === "text") return null;
+  if (state.type !== "image") return null;
 
   const handleFileInput = (e: ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0] ?? null;
@@ -59,7 +59,7 @@ export default function FileSection() {
           </div>
         ) : (
           <div className="space-y-2">
-            <p className="text-slate-500 text-lg font-display">drag media here</p>
+            <p className="text-slate-500 text-lg font-display">drag image here</p>
             <p className="text-slate-600 text-sm font-display">{option.hint}</p>
           </div>
         )}
@@ -81,4 +81,3 @@ export default function FileSection() {
     </div>
   );
 }
-

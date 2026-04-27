@@ -86,6 +86,7 @@ type DropFormActions = {
   autoFillFromIp: () => Promise<void>;
   submit: () => Promise<void>;
   clearError: () => void;
+  setError: (message: string | null) => void;
 };
 
 type DropFormContextValue = {
@@ -95,7 +96,50 @@ type DropFormContextValue = {
 
 const DropFormContext = createContext<DropFormContextValue | null>(null);
 
-function validate(state: DropFormState): string | null {
+const VOICE_NOTE_MAX_DURATION_SECONDS = 30;
+const ALLOWED_VOICE_NOTE_MIME_TYPES = new Set([
+  "audio/webm",
+  "audio/ogg",
+  "audio/wav",
+  "audio/x-wav",
+  "audio/mp4",
+  "audio/m4a",
+  "audio/x-m4a",
+  "audio/aac",
+]);
+
+function getAudioDuration(file: File): Promise<number> {
+  return new Promise((resolve, reject) => {
+    const audio = document.createElement("audio");
+    const url = URL.createObjectURL(file);
+
+    const cleanup = () => {
+      URL.revokeObjectURL(url);
+      audio.removeAttribute("src");
+      audio.load();
+    };
+
+    audio.preload = "metadata";
+    audio.onloadedmetadata = () => {
+      const { duration } = audio;
+      cleanup();
+
+      if (!Number.isFinite(duration)) {
+        reject(new Error("Could not read voice note duration."));
+        return;
+      }
+
+      resolve(duration);
+    };
+    audio.onerror = () => {
+      cleanup();
+      reject(new Error("Could not read voice note duration."));
+    };
+    audio.src = url;
+  });
+}
+
+async function validate(state: DropFormState): Promise<string | null> {
   const latNum = parseFloat(state.lat);
   const lngNum = parseFloat(state.lng);
   if (!state.lat || !state.lng || Number.isNaN(latNum) || Number.isNaN(lngNum)) {
@@ -109,7 +153,28 @@ function validate(state: DropFormState): string | null {
   if (state.type === "text" && state.text.trim().length > 2000) {
     return "Message cannot exceed 2000 characters.";
   }
-  if (state.type !== "text" && !state.file) return `Please attach a ${state.type} file.`;
+  if (state.type === "image" && !state.file) return "Please attach an image file.";
+  if (state.type === "audio" && !state.file) return "Please attach a voice note.";
+
+  if (state.type === "image" && state.file && !state.file.type.startsWith("image/")) {
+    return "Please attach an image file.";
+  }
+
+  if (state.type === "audio" && state.file) {
+    if (!ALLOWED_VOICE_NOTE_MIME_TYPES.has(state.file.type)) {
+      return "Please attach a voice note. MP3 files are not supported.";
+    }
+
+    try {
+      const duration = await getAudioDuration(state.file);
+      if (duration > VOICE_NOTE_MAX_DURATION_SECONDS) {
+        return "Voice notes cannot be longer than 30 seconds.";
+      }
+    } catch {
+      return "Could not read voice note duration. Please try another recording.";
+    }
+  }
+
   return null;
 }
 
@@ -151,6 +216,10 @@ export function DropMessageProvider({ children }: { children: ReactNode }) {
     dispatch({ type: "RESET_ERROR" });
   }, []);
 
+  const setError = useCallback((message: string | null) => {
+    dispatch({ type: "SET_ERROR", value: message });
+  }, []);
+
   const autoFillFromIp = useCallback(async () => {
     if (state.ipLocLoading) return;
     dispatch({ type: "SET_IP_LOC_LOADING", value: true });
@@ -177,7 +246,7 @@ export function DropMessageProvider({ children }: { children: ReactNode }) {
   }, [autoFillFromIp, state.lat, state.lng]);
 
   const submit = useCallback(async () => {
-    const validationError = validate(state);
+    const validationError = await validate(state);
     if (validationError) {
       dispatch({ type: "SET_ERROR", value: validationError });
       return;
@@ -245,8 +314,9 @@ export function DropMessageProvider({ children }: { children: ReactNode }) {
       autoFillFromIp,
       submit,
       clearError,
+      setError,
     }),
-    [autoFillFromIp, clearError, setFile, setLat, setLng, setText, setType, submit],
+    [autoFillFromIp, clearError, setError, setFile, setLat, setLng, setText, setType, submit],
   );
 
   const value = useMemo<DropFormContextValue>(
